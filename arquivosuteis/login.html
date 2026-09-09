@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - RespiraAi</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="login-page">
+  <div class="login-container">
+    <h1>RespiraAi</h1>
+    <h2>Faça login para continuar</h2>
+    <form class="login-form" method="POST" action="{{ url_for('login') }}">
+      <input type="text" name="user" placeholder="Usuário" required />
+      <input type="password" name="pass" placeholder="Senha" required />
+      <button type="submit">Entrar</button>
+      {% if erro %}
+      <p id="erro" style="color: red;">{{ erro }}</p>
+      {% endif %}
+    </form>
+    <p class="cadastro">Não tem conta? <a href="{{ url_for('cadastro') }}">Cadastre-se</a></p>
+  </div>
+
+
+</body>

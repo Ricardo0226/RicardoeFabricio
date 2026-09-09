@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Adicionar Laboratório</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  </head>
+  <body>
+    <main>
+      <section class="conteiner">
+        <section class="direita">
+          <div class="card">
+            <h2>Adicionar Laboratório</h2>
+            {% if error %}
+            <p style="color: red">{{ error }}</p>
+            {% endif %}
+            <form method="post" action="{{ url_for('newlab') }}">
+              <label for="numero">Número</label>
+              <input id="numero" name="numero" required />
+
+              <label for="capacidade">Capacidade</label>
+              <input id="capacidade" name="capacidade" placeholder="N° DE COMPUTADORES"/>
+
+              <label for="descricao">Descrição</label>
+              <textarea id="descricao" name="descricao" placeholder="SOBRE O LABORATÓRIO"></textarea>
+
+              <div style="margin-top:10px">
+                <button class="btn" type="submit">Adicionar</button>
+                <a class="btn" href="{{ url_for('menu') }}">Voltar</a>
+              </div>
+            </form>
+          </div>
+        </section>
+      </section>
+    </main>
+  </body>
+</html>

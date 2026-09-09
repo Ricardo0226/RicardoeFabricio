@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LabAgenda - Login teste</title>
+</head>
+<body>
+    <h1>LabAgenda - Página de Login (Teste)</h1>
+    <form class="login-form">
+        <label for="username">Matricula:</label>
+        <input type="text" id="username" name="username" required>
+        <br><br>
+        <label for="password">Senha:</label>
+        <input type="password" id="password" name="password" required>
+        <br><br>
+        <button type="submit">Entrar</button>
+    </form>
+
+    <div><a href="{{ url_for('index') }}">ENTRAR</a></div>
+</body>
+</html>
