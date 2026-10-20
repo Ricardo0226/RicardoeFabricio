@@ -9,17 +9,23 @@ Aplicação web Flask para organização do calendário acadêmico da turma.
 - layout Bootstrap;
 - modelos relacionais com SQLAlchemy;
 - persistência SQLite para desenvolvimento;
-- testes da página inicial, dos modelos e do relacionamento entre eventos e turmas.
+- integração inicial do FullCalendar;
+- endpoint `/api/events` para os eventos do calendário;
+- testes da página, dos modelos, da persistência e do calendário.
+
+## Calendário
+
+A interface utiliza o FullCalendar via CDN para exibir os eventos salvos no banco. A página oferece visualizações mensal, semanal e em lista, com localização em português.
+
+O endpoint `GET /api/events` retorna os eventos no formato esperado pelo FullCalendar. A criação e a edição de eventos ficarão para as próximas tarefas de CRUD.
 
 ## Modelos atuais
-
-Os modelos relacionais atuais são:
 
 - `User`: nome, e-mail, perfil e identificador;
 - `Classroom`: nome, descrição e identificador;
 - `Event`: título, período, descrição e vínculo opcional com uma turma.
 
-`Event.classroom_id` é uma chave estrangeira opcional para `Classroom`. A aplicação cria as tabelas na inicialização. O banco padrão fica em `instance/classsync.db` no ambiente Flask; a variável `DATABASE_URL` pode apontar para outro SQLite ou banco compatível.
+`Event.classroom_id` é uma chave estrangeira opcional para `Classroom`. A aplicação cria as tabelas na inicialização. O banco padrão fica em `instance/classsync.db`; a variável `DATABASE_URL` pode apontar para outro SQLite ou banco compatível.
 
 ## Execução
 
