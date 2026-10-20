@@ -7,18 +7,19 @@ Aplicação web Flask para organização do calendário acadêmico da turma.
 - aplicação Flask mínima;
 - rota pública `/`;
 - layout Bootstrap;
-- modelos de domínio iniciais;
-- testes da página inicial e dos modelos.
+- modelos relacionais com SQLAlchemy;
+- persistência SQLite para desenvolvimento;
+- testes da página inicial, dos modelos e do relacionamento entre eventos e turmas.
 
 ## Modelos atuais
 
-A Issue #2 adiciona três modelos simples, ainda sem persistência:
+Os modelos relacionais atuais são:
 
 - `User`: nome, e-mail, perfil e identificador;
 - `Classroom`: nome, descrição e identificador;
 - `Event`: título, período, descrição e vínculo opcional com uma turma.
 
-A configuração do banco de dados será feita separadamente na Issue #3.
+`Event.classroom_id` é uma chave estrangeira opcional para `Classroom`. A aplicação cria as tabelas na inicialização. O banco padrão fica em `instance/classsync.db` no ambiente Flask; a variável `DATABASE_URL` pode apontar para outro SQLite ou banco compatível.
 
 ## Execução
 
