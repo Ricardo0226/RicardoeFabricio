@@ -1,25 +1,58 @@
 {% extends "base.html" %}
-
-{% block title %}Início — ClassSync{% endblock %}
-
-{% block content %}
-
-<section class="p-5 bg-light rounded-3 border">
-  
-  <p class="text-primary text-uppercase fw-semibold small mb-2">Estrutura inicial</p>p>
-  
-  <h1 class="display-5 fw-bold">ClassSync</h1>h1>
-  
-  <p class="lead">Calendário acadêmico da turma.</p>p>
-  
-  <p class="text-secondary mb-0">Nesta etapa estamos preparando a estrutura Flask e o layout Bootstrap. As próximas tarefas adicionarão banco de dados, modelos, calendário e autenticação.</p>p>
-  
-</section>section>
-
+{% block title %}Calendário — ClassSync{% endblock %}
+{% block head %}
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
 {% endblock %}
+{% block content %}
+<section class="mb-4">
+  <p class="text-primary text-uppercase fw-semibold small mb-2">Calendário acadêmico</p>
+  <h1 class="display-6 fw-bold">Agenda da turma</h1>
+  <p class="text-secondary mb-0">Visualização inicial dos eventos cadastrados no ClassSync.</p>
+</section>
+<section class="card shadow-sm">
+  <div class="card-body">
+    <div id="calendar" aria-label="Calendário de eventos"></div>
+    <p id="calendar-empty" class="text-secondary text-center d-none mb-0 mt-3">
+      Nenhum evento cadastrado ainda.
+    </p>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", async () => {
+    const calendarElement = document.getElementById("calendar");
+    const emptyMessage = document.getElementById("calendar-empty");
+    const response = await fetch("{{ url_for('events') }}");
+    const events = await response.json();
 
+    const calendar = new FullCalendar.Calendar(calendarElement, {
+      locale: "pt-br",
+      initialView: "dayGridMonth",
+      height: "auto",
+      headerToolbar: {
+        left: "prev,next today",
+        center: "title",
+        right: "dayGridMonth,timeGridWeek,listWeek"
+      },
+      buttonText: {
+        today: "Hoje",
+        month: "Mês",
+        week: "Semana",
+        list: "Lista"
+      },
+      events,
+      eventClick(info) {
+        const details = info.event.extendedProps.description;
+        if (details) {
+          window.alert(`${info.event.title}\n\n${details}`);
+        }
+      }
+    });
 
-
-
-
-
+    calendar.render();
+    emptyMessage.classList.toggle("d-none", events.length > 0);
+  });
+</script>
+{% endblock %}

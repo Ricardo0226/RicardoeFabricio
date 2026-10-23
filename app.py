@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask, render_template
+from flask import Flask, jsonify, render_template
 from database import db
 
 
@@ -25,6 +25,23 @@ def create_app(test_config=None):
     @app.get("/")
     def index():
         return render_template("index.html")
+
+    @app.get("/api/events")
+    def events():
+        from models import Event
+
+        calendar_events = [
+            {
+                "id": event.id,
+                "title": event.title,
+                "start": event.start_at.isoformat(),
+                "end": event.end_at.isoformat(),
+                "description": event.description,
+                "classroom": event.classroom.name if event.classroom else None,
+            }
+            for event in Event.query.order_by(Event.start_at).all()
+        ]
+        return jsonify(calendar_events)
 
     return app
 
