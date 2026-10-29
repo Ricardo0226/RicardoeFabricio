@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Cadastro — ClassSync{% endblock %}
+{% block content %}
+<section class="row justify-content-center">
+  <div class="col-lg-7 col-xl-6">
+    <div class="card shadow-sm">
+      <div class="card-body p-4 p-md-5">
+        <p class="text-primary text-uppercase fw-semibold small mb-2">Sprint 2.1</p>
+        <h1 class="h3 fw-bold">Criar cadastro de estudante</h1>
+        <p class="text-secondary">Cadastre-se para acompanhar os eventos da sua turma.</p>
+        <form method="post" novalidate>
+          <div class="mb-3">
+            <label class="form-label" for="name">Nome completo</label>
+            <input class="form-control" id="name" name="name" minlength="2" maxlength="120" required value="{{ request.form.get('name', '') }}">
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="email">E-mail</label>
+            <input class="form-control" id="email" name="email" type="email" required value="{{ request.form.get('email', '') }}">
+          </div>
+          <div class="mb-4">
+            <label class="form-label" for="password">Senha</label>
+            <input class="form-control" id="password" name="password" type="password" minlength="8" required>
+            <div class="form-text">Use pelo menos 8 caracteres.</div>
+          </div>
+          <button class="btn btn-primary w-100" type="submit">Criar cadastro</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
