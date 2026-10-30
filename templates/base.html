@@ -12,7 +12,17 @@
   <nav class="navbar navbar-dark bg-primary">
     <div class="container">
       <a class="navbar-brand fw-semibold" href="{{ url_for('index') }}">ClassSync</a>
-      <a class="btn btn-light btn-sm" href="{{ url_for('register') }}">Criar cadastro</a>
+      <div class="d-flex align-items-center gap-2">
+        {% if session.get('user_id') %}
+          <span class="text-white small">Olá, {{ session.get('user_name') }}</span>
+          <form method="post" action="{{ url_for('logout') }}" class="d-inline">
+            <button class="btn btn-light btn-sm" type="submit">Sair</button>
+          </form>
+        {% else %}
+          <a class="btn btn-outline-light btn-sm" href="{{ url_for('login') }}">Entrar</a>
+          <a class="btn btn-light btn-sm" href="{{ url_for('register') }}">Criar cadastro</a>
+        {% endif %}
+      </div>
     </div>
   </nav>
   <main class="container py-5">
