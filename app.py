@@ -1,7 +1,7 @@
 import os
 import re
 
-from flask import Flask, flash, jsonify, redirect, render_template, request, url_for
+from flask import Flask, flash, jsonify, redirect, render_template, request, session, url_for
 from sqlalchemy.exc import IntegrityError
 
 from database import db
@@ -77,6 +77,34 @@ def create_app(test_config=None):
             return redirect(url_for("index"))
 
         return render_template("register.html")
+
+    @app.route("/login", methods=["GET", "POST"])
+    def login():
+        if request.method == "POST":
+            email = (request.form.get("email") or "").strip().lower()
+            password = request.form.get("password") or ""
+
+            from models import User
+
+            user = User.query.filter_by(email=email).first()
+            if user is None or not user.check_password(password):
+                flash("E-mail ou senha inválidos.", "danger")
+                return render_template("login.html"), 401
+
+            session.clear()
+            session["user_id"] = user.id
+            session["user_name"] = user.name
+            session["user_role"] = user.role
+            flash("Login realizado com sucesso.", "success")
+            return redirect(url_for("index"))
+
+        return render_template("login.html")
+
+    @app.post("/logout")
+    def logout():
+        session.clear()
+        flash("Logout realizado com sucesso.", "success")
+        return redirect(url_for("index"))
 
     @app.get("/api/events")
     def events():
