@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Login — ClassSync{% endblock %}
+{% block content %}
+<section class="row justify-content-center">
+  <div class="col-lg-6 col-xl-5">
+    <div class="card shadow-sm">
+      <div class="card-body p-4 p-md-5">
+        <p class="text-primary text-uppercase fw-semibold small mb-2">Sprint 2.2</p>
+        <h1 class="h3 fw-bold">Entrar no ClassSync</h1>
+        <p class="text-secondary">Acesse sua conta para acompanhar a rotina da turma.</p>
+        <form method="post" novalidate>
+          <div class="mb-3">
+            <label class="form-label" for="email">E-mail</label>
+            <input class="form-control" id="email" name="email" type="email" required value="{{ request.form.get('email', '') }}">
+          </div>
+          <div class="mb-4">
+            <label class="form-label" for="password">Senha</label>
+            <input class="form-control" id="password" name="password" type="password" required>
+          </div>
+          <button class="btn btn-primary w-100" type="submit">Entrar</button>
+        </form>
+        <p class="small text-secondary mt-4 mb-0">Ainda não possui cadastro? <a href="{{ url_for('register') }}">Crie sua conta</a>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
