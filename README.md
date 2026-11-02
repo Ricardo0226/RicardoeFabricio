@@ -1,4 +1,4 @@
-# ClassSync — Sprint 1
+# ClassSync — Sprint 2.4
 
 Aplicação web Flask para organização do calendário acadêmico da turma.
 
@@ -11,13 +11,15 @@ Aplicação web Flask para organização do calendário acadêmico da turma.
 - persistência SQLite para desenvolvimento;
 - integração inicial do FullCalendar;
 - endpoint `/api/events` para os eventos do calendário;
-- testes da página, dos modelos, da persistência e do calendário.
+- cadastro, edição e exclusão de eventos por líderes/administradores;
+- painel protegido em `/admin`;
+- testes de autorização e do ciclo CRUD da Sprint 2.4.
 
 ## Calendário
 
 A interface utiliza o FullCalendar via CDN para exibir os eventos salvos no banco. A página oferece visualizações mensal, semanal e em lista, com localização em português.
 
-O endpoint `GET /api/events` retorna os eventos no formato esperado pelo FullCalendar. A criação e a edição de eventos ficarão para as próximas tarefas de CRUD.
+O endpoint `GET /api/events` retorna os eventos no formato esperado pelo FullCalendar. Líderes e administradores podem gerenciar compromissos pelo painel `/admin`; estudantes e visitantes mantêm acesso somente à visualização pública.
 
 ## Modelos atuais
 
