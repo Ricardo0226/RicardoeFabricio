@@ -50,6 +50,7 @@ def test_events_endpoint_returns_calendar_format():
             "start": "2026-10-20T19:00:00",
             "end": "2026-10-20T21:00:00",
             "description": "Revisao da sprint",
+            "category": "Evento",
             "classroom": "INFO4V",
         }
     ]

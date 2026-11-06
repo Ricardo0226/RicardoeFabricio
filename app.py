@@ -4,12 +4,13 @@ from datetime import datetime
 from functools import wraps
 
 from flask import Flask, flash, jsonify, redirect, render_template, request, session, url_for
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 from database import db
 
 EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 ADMIN_ROLES = {"leader", "admin"}
+EVENT_CATEGORIES = ("Prova", "Trabalho", "Apresentação", "Evento", "Outro")
 
 
 def validate_registration(name, email, password):
@@ -65,11 +66,14 @@ def admin_required(view):
 def event_form_data(form):
     title = (form.get("title") or "").strip()
     description = (form.get("description") or "").strip()
+    category = (form.get("category") or "").strip()
     start_at = parse_datetime(form.get("start_at"))
     end_at = parse_datetime(form.get("end_at"))
     errors = []
     if not title or len(title) > 160:
         errors.append("O título é obrigatório e deve ter até 160 caracteres.")
+    if category not in EVENT_CATEGORIES:
+        errors.append("Selecione uma categoria válida.")
     if not start_at:
         errors.append("Informe uma data e hora de início válidas.")
     if form.get("end_at") and not end_at:
@@ -79,6 +83,7 @@ def event_form_data(form):
     return {
         "title": title,
         "description": description,
+        "category": category,
         "start_at": start_at,
         "end_at": end_at or start_at,
     }, errors
@@ -103,6 +108,23 @@ def create_app(test_config=None):
     def inject_user():
         user = current_user()
         return {"current_user": user, "is_admin": bool(user and user.role in ADMIN_ROLES)}
+
+    @app.errorhandler(404)
+    def not_found(error):
+        return render_template(
+            "error.html",
+            code=404,
+            message="A página ou compromisso solicitado não foi encontrado.",
+        ), 404
+
+    @app.errorhandler(500)
+    def internal_server_error(error):
+        db.session.rollback()
+        return render_template(
+            "error.html",
+            code=500,
+            message="Ocorreu um erro inesperado. Tente novamente mais tarde.",
+        ), 500
 
     @app.get("/")
     def index():
@@ -175,6 +197,7 @@ def create_app(test_config=None):
                 "start": event.start_at.isoformat(),
                 "end": event.end_at.isoformat(),
                 "description": event.description,
+                "category": event.category,
                 "classroom": event.classroom.name if event.classroom else None,
             }
             for event in Event.query.order_by(Event.start_at).all()
@@ -200,16 +223,30 @@ def create_app(test_config=None):
                 for error in errors:
                     flash(error, "danger")
                 return render_template(
-                    "event_form.html", event=None, form_title="Novo compromisso", form_data=request.form
+                    "event_form.html",
+                    event=None,
+                    form_title="Novo compromisso",
+                    form_data=request.form,
+                    categories=EVENT_CATEGORIES,
                 ), 422
             user = current_user()
             classroom = user.classroom or Classroom.query.filter_by(active=True).order_by(Classroom.id).first()
             event = Event(**data, classroom=classroom)
             db.session.add(event)
-            db.session.commit()
+            try:
+                db.session.commit()
+            except SQLAlchemyError:
+                db.session.rollback()
+                return render_template("error.html", code=500, message="Não foi possível salvar o compromisso."), 500
             flash("Compromisso criado no calendário.", "success")
             return redirect(url_for("admin"))
-        return render_template("event_form.html", event=None, form_title="Novo compromisso", form_data={})
+        return render_template(
+            "event_form.html",
+            event=None,
+            form_title="Novo compromisso",
+            form_data={},
+            categories=EVENT_CATEGORIES,
+        )
 
     @app.route("/admin/events/<int:event_id>/edit", methods=["GET", "POST"])
     @admin_required
@@ -223,14 +260,28 @@ def create_app(test_config=None):
                 for error in errors:
                     flash(error, "danger")
                 return render_template(
-                    "event_form.html", event=event, form_title="Editar compromisso", form_data=request.form
+                    "event_form.html",
+                    event=event,
+                    form_title="Editar compromisso",
+                    form_data=request.form,
+                    categories=EVENT_CATEGORIES,
                 ), 422
             for key, value in data.items():
                 setattr(event, key, value)
-            db.session.commit()
+            try:
+                db.session.commit()
+            except SQLAlchemyError:
+                db.session.rollback()
+                return render_template("error.html", code=500, message="Não foi possível atualizar o compromisso."), 500
             flash("Compromisso atualizado.", "success")
             return redirect(url_for("admin"))
-        return render_template("event_form.html", event=event, form_title="Editar compromisso", form_data={})
+        return render_template(
+            "event_form.html",
+            event=event,
+            form_title="Editar compromisso",
+            form_data={},
+            categories=EVENT_CATEGORIES,
+        )
 
     @app.post("/admin/events/<int:event_id>/delete")
     @admin_required
@@ -239,7 +290,11 @@ def create_app(test_config=None):
 
         event = db.get_or_404(Event, event_id)
         db.session.delete(event)
-        db.session.commit()
+        try:
+            db.session.commit()
+        except SQLAlchemyError:
+            db.session.rollback()
+            return render_template("error.html", code=500, message="Não foi possível remover o compromisso."), 500
         flash("Compromisso removido.", "success")
         return redirect(url_for("admin"))
 
