@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Erro {{ code }} — ClassSync{% endblock %}
+{% block content %}
+<section class="text-center py-5">
+  <p class="text-primary text-uppercase fw-semibold small mb-2">ClassSync</p>
+  <h1 class="display-4 fw-bold">{{ code }}</h1>
+  <p class="lead text-secondary">{{ message }}</p>
+  <a class="btn btn-primary" href="{{ url_for('index') }}">Voltar ao calendário</a>
+</section>
+{% endblock %}
