@@ -4,6 +4,7 @@ from datetime import datetime
 from functools import wraps
 
 from flask import Flask, flash, jsonify, redirect, render_template, request, session, url_for
+from sqlalchemy import inspect, text
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 from database import db
@@ -11,6 +12,24 @@ from database import db
 EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 ADMIN_ROLES = {"leader", "admin"}
 EVENT_CATEGORIES = ("Prova", "Trabalho", "Apresentação", "Evento", "Outro")
+
+
+def upgrade_sqlite_schema():
+    """Apply small, idempotent schema upgrades for existing SQLite databases."""
+    if db.engine.dialect.name != "sqlite":
+        return
+
+    event_columns = {
+        column["name"] for column in inspect(db.engine).get_columns("events")
+    }
+    if "category" not in event_columns:
+        with db.engine.begin() as connection:
+            connection.execute(
+                text(
+                    "ALTER TABLE events "
+                    "ADD COLUMN category VARCHAR(40) NOT NULL DEFAULT 'Evento'"
+                )
+            )
 
 
 def validate_registration(name, email, password):
@@ -103,6 +122,7 @@ def create_app(test_config=None):
         import models  # noqa: F401
 
         db.create_all()
+        upgrade_sqlite_schema()
 
     @app.context_processor
     def inject_user():

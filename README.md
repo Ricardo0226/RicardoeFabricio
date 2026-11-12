@@ -30,7 +30,7 @@ O endpoint `GET /api/events` retorna os eventos no formato esperado pelo FullCal
 - `Classroom`: nome, descrição e identificador;
 - `Event`: título, categoria, período, descrição e vínculo opcional com uma turma.
 
-`Event.classroom_id` é uma chave estrangeira opcional para `Classroom`. A aplicação cria as tabelas na inicialização. O banco padrão fica em `instance/classsync.db`; a variável `DATABASE_URL` pode apontar para outro SQLite ou banco compatível.
+`Event.classroom_id` é uma chave estrangeira opcional para `Classroom`. A aplicação cria as tabelas na inicialização e atualiza bancos SQLite legados, adicionando automaticamente a coluna `Event.category` quando ela ainda não existe. O banco padrão fica em `instance/classsync.db`; a variável `DATABASE_URL` pode apontar para outro SQLite ou banco compatível.
 
 ## Execução
 
