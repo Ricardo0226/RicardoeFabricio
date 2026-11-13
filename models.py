@@ -46,6 +46,7 @@ class Event(db.Model):
     title = db.Column(db.String(160), nullable=False)
     start_at = db.Column(db.DateTime, nullable=False)
     end_at = db.Column(db.DateTime, nullable=False)
+    category = db.Column(db.String(40), nullable=False, default="Evento")
     classroom_id = db.Column(
         db.Integer,
         db.ForeignKey("classrooms.id"),

@@ -1,6 +1,8 @@
 from datetime import datetime
+from unittest.mock import patch
 
 import pytest
+from sqlalchemy.exc import SQLAlchemyError
 
 from app import create_app
 from database import db
@@ -62,6 +64,7 @@ def test_leader_can_create_edit_and_delete_event(client):
         data={
             "title": "Reunião de projeto",
             "description": "Apresentação da sprint",
+            "category": "Trabalho",
             "start_at": "2026-11-10T19:00",
             "end_at": "2026-11-10T21:00",
         },
@@ -72,6 +75,7 @@ def test_leader_can_create_edit_and_delete_event(client):
         event = Event.query.one()
         event_id = event.id
         assert event.title == "Reunião de projeto"
+        assert event.category == "Trabalho"
         assert event.classroom.name == "INFO4V"
 
     edit = client.post(
@@ -79,6 +83,7 @@ def test_leader_can_create_edit_and_delete_event(client):
         data={
             "title": "Reunião atualizada",
             "description": "Pauta revisada",
+            "category": "Apresentação",
             "start_at": "2026-11-11T19:00",
             "end_at": "2026-11-11T20:00",
         },
@@ -93,6 +98,7 @@ def test_leader_can_create_edit_and_delete_event(client):
     public_events = client.get("/api/events")
     assert public_events.status_code == 200
     assert public_events.json[0]["title"] == "Reunião atualizada"
+    assert public_events.json[0]["category"] == "Apresentação"
 
     delete = client.post(f"/admin/events/{event_id}/delete")
     assert delete.status_code == 302
@@ -106,6 +112,7 @@ def test_event_creation_rejects_invalid_period(client):
         "/admin/events/new",
         data={
             "title": "Período inválido",
+            "category": "Evento",
             "start_at": "2026-11-10T21:00",
             "end_at": "2026-11-10T19:00",
         },
@@ -116,6 +123,44 @@ def test_event_creation_rejects_invalid_period(client):
         assert Event.query.count() == 0
 
 
+def test_event_creation_rejects_unknown_category(client):
+    login(client, "lider@example.com")
+    response = client.post(
+        "/admin/events/new",
+        data={
+            "title": "Categoria inválida",
+            "category": "Recesso",
+            "start_at": "2026-11-10T19:00",
+            "end_at": "2026-11-10T20:00",
+        },
+    )
+    assert response.status_code == 422
+    assert b"categoria v\xc3\xa1lida" in response.data
+    with client.application.app_context():
+        assert Event.query.count() == 0
+
+
 def test_missing_event_returns_not_found_for_leader(client):
     login(client, "lider@example.com")
-    assert client.get("/admin/events/999999/edit").status_code == 404
+    response = client.get("/admin/events/999999/edit")
+    assert response.status_code == 404
+    assert b"n\xc3\xa3o foi encontrado" in response.data
+
+
+def test_database_failure_rolls_back_and_hides_details(client):
+    login(client, "lider@example.com")
+    with patch.object(db.session, "commit", side_effect=SQLAlchemyError("senha interna")):
+        response = client.post(
+            "/admin/events/new",
+            data={
+                "title": "Falha de persistência",
+                "category": "Evento",
+                "start_at": "2026-11-10T19:00",
+                "end_at": "2026-11-10T20:00",
+            },
+        )
+    assert response.status_code == 500
+    assert b"N\xc3\xa3o foi poss\xc3\xadvel salvar o compromisso" in response.data
+    assert b"senha interna" not in response.data
+    with client.application.app_context():
+        assert Event.query.count() == 0

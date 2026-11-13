@@ -5,7 +5,7 @@
   <div class="col-lg-8">
     <div class="card shadow-sm">
       <div class="card-body p-4 p-md-5">
-        <p class="text-primary text-uppercase fw-semibold small mb-2">Sprint 2.4</p>
+        <p class="text-primary text-uppercase fw-semibold small mb-2">Sprint 2.5</p>
         <h1 class="h3 fw-bold">{{ form_title }}</h1>
         <p class="text-secondary">Preencha os dados do compromisso que será exibido no calendário.</p>
         <form method="post" novalidate>
@@ -16,6 +16,15 @@
           <div class="mb-3">
             <label class="form-label" for="description">Descrição</label>
             <textarea class="form-control" id="description" name="description" rows="4">{{ form_data.get('description', event.description if event else '') }}</textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="category">Categoria</label>
+            <select class="form-select" id="category" name="category" required>
+              <option value="">Selecione uma categoria</option>
+              {% for category in categories %}
+                <option value="{{ category }}" {% if form_data.get('category', event.category if event else '') == category %}selected{% endif %}>{{ category }}</option>
+              {% endfor %}
+            </select>
           </div>
           <div class="row g-3 mb-4">
             <div class="col-md-6">
